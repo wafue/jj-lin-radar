@@ -111,7 +111,9 @@ const BLOCKED_PUBLICATION_WORDS = [
   "BET366",
   "彩票",
   "体育网站",
-  "博彩"
+  "博彩",
+  "皇冠",
+  "womenofchina.com"
 ];
 
 const NAVIGATION_LABELS = new Set([
