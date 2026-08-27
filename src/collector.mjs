@@ -98,6 +98,29 @@ const LOCATION_WORDS = [
   "文化中心"
 ];
 
+const BLOCKED_PUBLICATION_WORDS = [
+  "亚博",
+  "万博",
+  "娱乐APP",
+  "官网正网",
+  "手机登录",
+  "滚球体育",
+  "LUTUBE",
+  "同升娱乐",
+  "爵士娱乐"
+];
+
+const NAVIGATION_LABELS = new Set([
+  "skip to main content",
+  "sign in",
+  "account",
+  "my feed",
+  "singapore",
+  "indonesia",
+  "asia",
+  "world"
+]);
+
 const parser = new XMLParser({
   ignoreAttributes: false,
   attributeNamePrefix: "",
@@ -175,7 +198,7 @@ function parseFeed(xml, source) {
     link: readLink(item.link || item.guid),
     published: readText(item.pubDate || item.published || item.updated || item["dc:date"]),
     source
-  })).filter(isRelevant).slice(0, 30);
+  })).filter(isRelevant).filter(isQualityItem).slice(0, 30);
 }
 
 function parseOfficialHtml(html, source) {
@@ -185,7 +208,8 @@ function parseOfficialHtml(html, source) {
       href: new URL(match[1], source.url).toString(),
       label: cleanText(match[2])
     }))
-    .filter((link) => isRelevant({ title: link.label, description: title }))
+    .filter((link) => isRelevant({ title: link.label }))
+    .filter((link) => !NAVIGATION_LABELS.has(link.label.toLowerCase()))
     .slice(0, 12);
 
   if (anchors.length === 0) {
@@ -210,6 +234,11 @@ function parseOfficialHtml(html, source) {
 function isRelevant(item) {
   const text = `${item.title || ""} ${item.description || ""}`;
   return /林俊杰|JJ\s*Lin|Wayne\s*Lin/i.test(text);
+}
+
+function isQualityItem(item) {
+  const text = `${item.title || ""} ${item.description || ""}`;
+  return !BLOCKED_PUBLICATION_WORDS.some((word) => text.includes(word));
 }
 
 export function normalizeItems(items) {
@@ -239,7 +268,7 @@ export function classifyItem(item) {
   const eventDate = extractEventDate(text);
   const hasScheduleWord = SCHEDULE_WORDS.some((word) => text.toLowerCase().includes(word.toLowerCase()));
   const hasLocation = LOCATION_WORDS.some((word) => text.toLowerCase().includes(word.toLowerCase()));
-  const kind = eventDate && hasScheduleWord && hasLocation ? "schedule" : "public_update";
+  const kind = isFutureEventDate(eventDate) && hasScheduleWord && hasLocation ? "schedule" : "public_update";
   const publishedAt = normalizeDate(item.published);
   const confidenceScore = scoreConfidence({ source: item.source, kind, eventDate, hasScheduleWord, hasLocation });
 
@@ -293,6 +322,14 @@ function normalizeDate(value) {
 function toIsoDate(year, month, day) {
   const date = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
+
+function isFutureEventDate(value) {
+  if (!value) return false;
+  const eventTime = new Date(value).getTime();
+  const today = new Date();
+  const todayStart = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+  return eventTime >= todayStart;
 }
 
 function readText(value) {
