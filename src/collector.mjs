@@ -107,7 +107,11 @@ const BLOCKED_PUBLICATION_WORDS = [
   "滚球体育",
   "LUTUBE",
   "同升娱乐",
-  "爵士娱乐"
+  "爵士娱乐",
+  "BET366",
+  "彩票",
+  "体育网站",
+  "博彩"
 ];
 
 const NAVIGATION_LABELS = new Set([
