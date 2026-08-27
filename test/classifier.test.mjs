@@ -44,6 +44,24 @@ test("keeps public updates separate when no concrete itinerary exists", () => {
   assert.equal(item.confidence, "中");
 });
 
+test("does not classify past dated announcements as current schedules", () => {
+  const item = classifyItem({
+    title: "林俊杰 2025年6月27日 在 北京 鸟巢 演唱会回顾",
+    description: "新闻回顾已结束的公开演出。",
+    link: "https://example.com/past-show",
+    published: "2026-08-21T10:00:00.000Z",
+    source: {
+      name: "新闻 RSS",
+      url: "https://example.com/feed",
+      type: "news",
+      reliability: 0.72
+    }
+  });
+
+  assert.equal(item.kind, "public_update");
+  assert.match(item.title, /回顾/);
+});
+
 test("normalization never injects hard-coded demo schedules", () => {
   const result = normalizeItems([]);
 
