@@ -1,0 +1,21 @@
+{
+  "name": "jj-lin-radar",
+  "version": "1.0.0",
+  "description": "中文 JJ LIN Radar，采集公开来源并区分行程与公开动态。",
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "build": "node scripts/build-check.mjs",
+    "start": "node src/server.mjs"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "fast-xml-parser": "^4.4.1",
+    "node-fetch": "^3.3.2",
+    "he": "^1.2.0"
+  },
+  "devDependencies": {}
+}
